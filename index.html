@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code CLI 中英文对照说明书</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg-primary: #0a0a0c;
+    --bg-secondary: #121214;
+    --bg-card: #1a1a1e;
+    --bg-hover: #222226;
+    --bg-input: #18181b;
+    --border: #2a2a30;
+    --border-light: #3a3a44;
+    --text-primary: #f0f0f2;
+    --text-secondary: #a0a0b0;
+    --text-muted: #6a6a7a;
+    --accent: #d4a27f;
+    --accent-light: #e8c4a8;
+    --accent-dim: #b8865e;
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --yellow: #fbbf24;
+    --purple: #a78bfa;
+    --red: #f87171;
+    --orange: #fb923c;
+    --code-bg: #0d0d11;
+    --glow: rgba(212, 162, 127, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+  /* Header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 12, 0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    height: 64px;
+    gap: 20px;
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .header-logo svg { width: 28px; height: 28px; }
+  .header-logo span {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .header-logo small {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 2px;
+    letter-spacing: 0.3px;
+  }
+  .search-bar {
+    flex: 1;
+    max-width: 480px;
+    position: relative;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 8px 16px 8px 40px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-bar input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+  }
+  .search-bar input::placeholder { color: var(--text-muted); }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+    pointer-events: none;
+  }
+  .search-shortcut {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: inherit;
+  }
+  .header-tabs {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .header-tab {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .header-tab:hover { color: var(--text-primary); background: var(--bg-card); }
+  .header-tab.active {
+    color: var(--accent);
+    background: rgba(212, 162, 127, 0.1);
+  }
+  .lang-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    font-family: inherit;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .lang-toggle:hover { color: var(--text-primary); border-color: var(--border-light); }
+
+  /* Container */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 48px 24px 40px;
+    position: relative;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, var(--glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .hero .stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 28px;
+    position: relative;
+  }
+  .hero .stat-item {
+    text-align: center;
+  }
+  .hero .stat-item .num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .hero .stat-item .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .section-header .icon.blue { background: rgba(96, 165, 250, 0.15); color: var(--blue); }
+  .section-header .icon.green { background: rgba(74, 222, 128, 0.15); color: var(--green); }
+  .section-header .icon.purple { background: rgba(167, 139, 250, 0.15); color: var(--purple); }
+  .section-header .icon.orange { background: rgba(251, 146, 60, 0.15); color: var(--orange); }
+  .section-header .icon.yellow { background: rgba(251, 191, 36, 0.15); color: var(--yellow); }
+  .section-header .icon.red { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .section-header .en-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .section-header .count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    padding: 3px 10px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead {
+    background: var(--bg-secondary);
+  }
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  thead th:last-child { text-align: right; }
+  tbody tr {
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: var(--bg-hover); }
+  tbody tr.hidden { display: none; }
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .cell-command {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-light);
+    white-space: nowrap;
+    min-width: 140px;
+  }
+  .cell-command .flag-prefix {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .cell-cn { color: var(--text-primary); min-width: 160px; }
+  .cell-en { color: var(--text-secondary); font-size: 13px; min-width: 160px; }
+  .cell-example {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    max-width: 280px;
+    word-break: break-all;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .tag-print { background: rgba(74, 222, 128, 0.12); color: var(--green); }
+  .tag-int { background: rgba(96, 165, 250, 0.12); color: var(--blue); }
+  .tag-both { background: rgba(167, 139, 250, 0.12); color: var(--purple); }
+  .tag-cfg { background: rgba(251, 191, 36, 0.12); color: var(--yellow); }
+  .tag-dev { background: rgba(248, 113, 113, 0.12); color: var(--red); }
+
+  /* Info boxes */
+  .info-box {
+    margin-top: 16px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border-left: 3px solid var(--accent);
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .info-box strong { color: var(--text-primary); }
+  .info-box code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent-light);
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 32px 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 48px;
+  }
+  .footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .footer a:hover { text-decoration: underline; }
+
+  /* No results */
+  .no-results {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-muted);
+    display: none;
+  }
+  .no-results.visible { display: block; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header-inner { flex-wrap: wrap; height: auto; padding: 12px 0; gap: 10px; }
+    .header-logo span { font-size: 16px; }
+    .header-tabs { order: 3; width: 100%; overflow-x: auto; }
+    .search-bar { max-width: 100%; order: 2; }
+    .lang-toggle { order: 3; }
+    .hero h1 { font-size: 26px; }
+    .hero .stats { gap: 20px; flex-wrap: wrap; }
+    .container { padding: 16px; }
+    thead th, tbody td { padding: 10px 12px; font-size: 13px; }
+    .cell-command { font-size: 12px; min-width: 100px; }
+    .cell-example { display: none; }
+  }
+
+  /* Smooth scroll */
+  html { scroll-behavior: smooth; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-muted);
+  }
+  .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; }
+
+  /* Bilingual badge */
+  .badge-en {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+    margin-left: 6px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <a class="header-logo" href="#">
+      <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="#d4a27f" stroke-width="2"/><path d="M9 14h10M14 9v10" stroke="#d4a27f" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Claude Code <small>CLI 中英对照</small></span>
+    </a>
+    <div class="search-bar">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="searchInput" placeholder="搜索命令 / Search commands..." oninput="filterTable()">
+      <span class="search-shortcut">Ctrl+K</span>
+    </div>
+    <button class="lang-toggle" id="langToggle" onclick="toggleLang()">
+      <span>🇨🇳</span> 中 / EN
+    </button>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- Hero -->
+<section class="hero">
+  <h1>Claude Code <span>CLI</span> 命令参考手册</h1>
+  <p>完整的中英文对照命令行参考，涵盖子命令、标志参数、交互命令、快捷键和环境变量</p>
+  <div class="stats">
+    <div class="stat-item"><div class="num" id="totalCmds">0</div><div class="label">命令 / 标志</div></div>
+    <div class="stat-item"><div class="num">6</div><div class="label">分类章节</div></div>
+    <div class="stat-item"><div class="num">中 ↔ EN</div><div class="label">双语对照</div></div>
+  </div>
+</section>
+
+<!-- 1. Subcommands -->
+<section class="section" id="subcommands">
+  <div class="section-header">
+    <div class="icon blue">⌘</div>
+    <h2>子命令 <span class="en-hint">Subcommands</span></h2>
+    <span class="count" id="count-subcommands">0</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>命令 / Command</th><th>中文说明</th><th>English Description</th><th>示例 / Example</th></tr></thead>
+      <tbody id="tbody-subcommands"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 2. Flags -->
+<section class="section" id="flags">
+  <div class="section-header">
+    <div class="icon green">⚑</div>
+    <h2>运行标志 <span class="en-hint">CLI Flags</span></h2>
+    <span class="count" id="count-flags">0</span>
+  </div>
+  <div class="info-box">
+    <strong>💡 提示：</strong> 标志分为 <code>-p</code>（打印模式）、<code>--model</code>（模型选择）、<code>--dangerously-skip-permissions</code>（权限绕过）等几大类。<br>
+    标签含义：<span class="tag tag-print">print</span> 仅打印模式可用 &nbsp; <span class="tag tag-int">interactive</span> 仅交互模式可用 &nbsp; <span class="tag tag-both">both</span> 两者均可
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>标志 / Flag</th><th>中文说明</th><th>English</th><th>模式</th></tr></thead>
+      <tbody id="tbody-flags"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 3. Slash Commands -->
+<section class="section" id="slash-commands">
+  <div class="section-header">
+    <div class="icon purple">/</div>
+    <h2>交互命令 <span class="en-hint">Slash Commands</span></h2>
+    <span class="count" id="count-slash">0</span>
+  </div>
+  <div class="info-box">
+    <strong>💡 提示：</strong> 斜杠命令仅在交互模式（Interactive REPL）中使用。<code>/help</code> 可查看所有可用命令。
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>命令</th><th>中文说明</th><th>English</th></tr></thead>
+      <tbody id="tbody-slash"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 4. Keyboard Shortcuts -->
+<section class="section" id="shortcuts">
+  <div class="section-header">
+    <div class="icon orange">⌨</div>
+    <h2>键盘快捷键 <span class="en-hint">Keyboard Shortcuts</span></h2>
+    <span class="count" id="count-shortcuts">0</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>快捷键</th><th>中文说明</th><th>English</th></tr></thead>
+      <tbody id="tbody-shortcuts"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 5. Environment Variables -->
+<section class="section" id="env">
+  <div class="section-header">
+    <div class="icon yellow">🌐</div>
+    <h2>环境变量 <span class="en-hint">Environment Variables</span></h2>
+    <span class="count" id="count-env">0</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>变量名</th><th>中文说明</th><th>English</th></tr></thead>
+      <tbody id="tbody-env"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 6. Settings & Configuration -->
+<section class="section" id="settings">
+  <div class="section-header">
+    <div class="icon red">⚙</div>
+    <h2>配置参考 <span class="en-hint">Settings & Configuration</span></h2>
+    <span class="count" id="count-settings">0</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>配置项</th><th>中文说明</th><th>English</th></tr></thead>
+      <tbody id="tbody-settings"></tbody>
+    </table>
+  </div>
+</section>
+
+<div class="empty-state" id="noResults">
+  <div class="emoji">🔍</div>
+  <p>未找到匹配的命令<br><span style="color:var(--text-muted);font-size:13px;">No matching commands found</span></p>
+</div>
+
+<footer class="footer">
+  <p>Claude Code CLI 中英文对照参考手册 · 数据来源：<a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank">Anthropic 官方文档</a></p>
+  <p style="margin-top:4px">Made with ❤️ by 小马 · 端口 12341</p>
+</footer>
+
+</div>
+
+<script>
+// ======================== DATA ========================
+
+const subcommands = [
+  { cmd: 'claude', cn: '启动交互式 REPL 会话', en: 'Start interactive REPL session', ex: 'claude' },
+  { cmd: 'claude "query"', cn: '以初始提示启动 REPL', en: 'Start REPL with initial prompt', ex: 'claude "Refactor auth module"' },
+  { cmd: 'claude -p "query"', cn: '打印模式 — 一次性任务，执行完毕退出', en: 'Print mode — one-shot task, exits when done', ex: 'claude -p "Fix this bug" --max-turns 10' },
+  { cmd: 'cat file | claude -p', cn: '管道输入作为上下文', en: 'Pipe content as stdin context', ex: 'cat main.py | claude -p "Review this"' },
+  { cmd: 'claude -c', cn: '继续当前目录中最近的对话', en: 'Continue most recent conversation in this dir', ex: 'claude -c' },
+  { cmd: 'claude -r <id>', cn: '按会话 ID 或名称恢复会话', en: 'Resume a session by ID or name', ex: 'claude -r 75e2167f' },
+  { cmd: 'claude auth login', cn: '登录认证（OAuth 浏览器）', en: 'Sign in via OAuth browser', ex: 'claude auth login' },
+  { cmd: 'claude auth login --console', cn: '控制台 API Key 认证', en: 'Console auth with API key billing', ex: 'claude auth login --console' },
+  { cmd: 'claude auth login --sso', cn: '企业 SSO 单点登录', en: 'Enterprise SSO login', ex: 'claude auth login --sso' },
+  { cmd: 'claude auth status', cn: '查看登录状态（JSON 输出）', en: 'Check login status (JSON)', ex: 'claude auth status' },
+  { cmd: 'claude auth status --text', cn: '查看登录状态（可读文本）', en: 'Check login status (human-readable)', ex: 'claude auth status --text' },
+  { cmd: 'claude mcp add', cn: '添加 MCP 服务器', en: 'Add an MCP server', ex: 'claude mcp add -s user github -- npx @modelcontextprotocol/server-github' },
+  { cmd: 'claude mcp list', cn: '列出已配置的 MCP 服务器', en: 'List configured MCP servers', ex: 'claude mcp list' },
+  { cmd: 'claude mcp remove', cn: '移除 MCP 服务器', en: 'Remove an MCP server', ex: 'claude mcp remove github' },
+  { cmd: 'claude agents', cn: '列出已配置的子智能体', en: 'List configured subagents', ex: 'claude agents' },
+  { cmd: 'claude doctor', cn: '运行安装健康检查', en: 'Run installation health checks', ex: 'claude doctor' },
+  { cmd: 'claude update / upgrade', cn: '更新到最新版本', en: 'Update to latest version', ex: 'claude update' },
+  { cmd: 'claude remote-control', cn: '启动远程控制服务器', en: 'Start server for remote control from web/mobile', ex: 'claude remote-control' },
+  { cmd: 'claude install', cn: '安装原生构建版本', en: 'Install native build (stable/latest/version)', ex: 'claude install latest' },
+  { cmd: 'claude setup-token', cn: '设置长期认证令牌', en: 'Set up long-lived auth token', ex: 'claude setup-token' },
+  { cmd: 'claude plugin / plugins', cn: '管理插件', en: 'Manage Claude Code plugins', ex: 'claude plugins' },
+  { cmd: 'claude auto-mode', cn: '查看自动模式分类器配置', en: 'Inspect auto mode classifier', ex: 'claude auto-mode' },
+];
+
+const flags = [
+  { flag: '-p, --print', cn: '一次性打印模式，执行完毕自动退出', en: 'Non-interactive one-shot mode', mode: 'print' },
+  { flag: '-c, --continue', cn: '继续当前目录最近的会话', en: 'Resume most recent conversation', mode: 'int' },
+  { flag: '-r, --resume <id>', cn: '按 ID/名称恢复指定会话', en: 'Resume a specific session', mode: 'int' },
+  { flag: '--fork-session', cn: '恢复时创建新会话 ID', en: 'Create new session ID on resume', mode: 'int' },
+  { flag: '--session-id <uuid>', cn: '使用指定 UUID 作为会话 ID', en: 'Use specific UUID for session', mode: 'both' },
+  { flag: '--no-session-persistence', cn: '不保存会话到磁盘', en: 'Don\'t save session to disk', mode: 'print' },
+  { flag: '--add-dir <paths>', cn: '授予 Claude 额外工作目录访问', en: 'Grant access to additional dirs', mode: 'both' },
+  { flag: '-w, --worktree [name]', cn: '在隔离的 git worktree 中运行', en: 'Run in isolated git worktree', mode: 'both' },
+  { flag: '--tmux', cn: '为 worktree 创建 tmux 会话', en: 'Create tmux session for worktree', mode: 'both' },
+  { flag: '--ide', cn: '启动时自动连接 IDE', en: 'Auto-connect to IDE on startup', mode: 'int' },
+  { flag: '--from-pr <num>', cn: '恢复关联 GitHub PR 的会话', en: 'Resume session linked to a PR', mode: 'both' },
+  { flag: '--file <specs>', cn: '启动时下载文件资源', en: 'Download file resources at startup', mode: 'both' },
+  { flag: '--model <alias>', cn: '选择模型（sonnet/opus/haiku）', en: 'Select model (sonnet/opus/haiku)', mode: 'both' },
+  { flag: '--effort <level>', cn: '推理深度（low/medium/high/max）', en: 'Reasoning effort level', mode: 'both' },
+  { flag: '--max-turns <n>', cn: '限制智能体循环次数（防失控）', en: 'Limit agentic loops (prevent runaway)', mode: 'print' },
+  { flag: '--max-budget-usd <n>', cn: 'API 花费上限（美元）', en: 'Cap API spend in dollars', mode: 'print' },
+  { flag: '--fallback-model <m>', cn: '默认模型过载时的备用模型', en: 'Fallback model when overloaded', mode: 'print' },
+  { flag: '--betas <betas>', cn: 'API 请求的 Beta 头（API Key 用户）', en: 'Beta headers in API requests', mode: 'both' },
+  { flag: '--dangerously-skip-permissions', cn: '自动批准所有工具调用', en: 'Auto-approve ALL tool use', mode: 'both' },
+  { flag: '--allow-dangerously-skip-permissions', cn: '启用绕过选项（不默认启用）', en: 'Enable bypass as option (not default)', mode: 'both' },
+  { flag: '--permission-mode <mode>', cn: '权限模式选择', en: 'Permission mode selection', mode: 'both' },
+  { flag: '--allowedTools <tools>', cn: '白名单工具列表', en: 'Whitelist specific tools', mode: 'both' },
+  { flag: '--disallowedTools <tools>', cn: '黑名单工具列表', en: 'Blacklist specific tools', mode: 'both' },
+  { flag: '--tools <tools>', cn: '覆盖内置工具集', en: 'Override built-in tool set', mode: 'both' },
+  { flag: '--output-format <fmt>', cn: '输出格式（text/json/stream-json）', en: 'Output format (text/json/stream-json)', mode: 'print' },
+  { flag: '--input-format <fmt>', cn: '输入格式（text/stream-json）', en: 'Input format (text/stream-json)', mode: 'print' },
+  { flag: '--json-schema <schema>', cn: '强制结构化 JSON 输出（匹配 schema）', en: 'Force structured JSON output', mode: 'print' },
+  { flag: '--verbose', cn: '显示每次交互的完整输出', en: 'Full turn-by-turn output', mode: 'print' },
+  { flag: '--include-partial-messages', cn: '包含部分消息块（stream-json）', en: 'Include partial message chunks', mode: 'print' },
+  { flag: '--replay-user-messages', cn: '重放用户消息（双向流）', en: 'Re-emit user messages (bidirectional)', mode: 'print' },
+  { flag: '--append-system-prompt <t>', cn: '追加到默认系统提示词', en: 'Append to default system prompt', mode: 'both' },
+  { flag: '--append-system-prompt-file <p>', cn: '用文件内容追加系统提示词', en: 'Append file to system prompt', mode: 'both' },
+  { flag: '--system-prompt <text>', cn: '替换整个系统提示词', en: 'Replace entire system prompt', mode: 'both' },
+  { flag: '--system-prompt-file <path>', cn: '用文件内容替换系统提示词', en: 'Replace system prompt with file', mode: 'both' },
+  { flag: '--bare', cn: '跳过所有扩展（钩子/插件/MCP/OAuth），最快速启动', en: 'Skip extensions (fastest startup)', mode: 'print' },
+  { flag: '--agents \'<json>\'', cn: '动态定义自定义子智能体', en: 'Define custom subagents dynamically', mode: 'both' },
+  { flag: '--mcp-config <path>', cn: '从 JSON 文件加载 MCP 服务器', en: 'Load MCP servers from JSON file', mode: 'both' },
+  { flag: '--strict-mcp-config', cn: '仅使用 --mcp-config 指定的服务器', en: 'Only use MCP from --mcp-config', mode: 'both' },
+  { flag: '--settings <file-or-json>', cn: '加载额外设置', en: 'Load additional settings', mode: 'both' },
+  { flag: '--setting-sources <src>', cn: '设置来源（user/project/local）', en: 'Setting sources', mode: 'both' },
+  { flag: '--plugin-dir <paths>', cn: '从目录加载插件', en: 'Load plugins from directories', mode: 'both' },
+  { flag: '--disable-slash-commands', cn: '禁用所有斜杠命令', en: 'Disable all slash commands', mode: 'both' },
+  { flag: '-d, --debug [filter]', cn: '启用调试日志（可加分类过滤）', en: 'Enable debug logging', mode: 'both' },
+  { flag: '--debug-file <path>', cn: '调试日志写入文件', en: 'Write debug logs to file', mode: 'both' },
+  { flag: '--teammate-mode <mode>', cn: '智能体团队显示模式', en: 'Agent team display mode', mode: 'both' },
+  { flag: '--brief', cn: '允许智能体与用户通信', en: 'Enable SendUserMessage tool', mode: 'both' },
+];
+
+const slashCommands = [
+  { cmd: '/help', cn: '显示所有命令（含自定义/MCP）', en: 'Show all commands' },
+  { cmd: '/compact [focus]', cn: '压缩上下文节省 token', en: 'Compress context to save tokens' },
+  { cmd: '/clear', cn: '清空对话历史，重新开始', en: 'Wipe conversation for fresh start' },
+  { cmd: '/context', cn: '可视化查看上下文窗口使用率', en: 'Visualize context usage as grid' },
+  { cmd: '/cost', cn: '查看 token 用量和模型消耗', en: 'View token usage & cost breakdown' },
+  { cmd: '/resume', cn: '切换或恢复其他会话', en: 'Switch to or resume a session' },
+  { cmd: '/rewind', cn: '回退到之前的检查点', en: 'Revert to previous checkpoint' },
+  { cmd: '/btw <question>', cn: '问一个不占用上下文的问题', en: 'Ask side question without context cost' },
+  { cmd: '/status', cn: '显示版本、连接和会话信息', en: 'Show version, connectivity, session info' },
+  { cmd: '/todos', cn: '列出对话中的待办事项', en: 'List tracked action items' },
+  { cmd: '/exit', cn: '结束当前会话（Ctrl+D 也可）', en: 'End session' },
+  { cmd: '/review', cn: '请求代码审查', en: 'Request code review of changes' },
+  { cmd: '/security-review', cn: '进行安全分析审查', en: 'Perform security analysis' },
+  { cmd: '/plan [desc]', cn: '进入规划模式', en: 'Enter Plan mode' },
+  { cmd: '/loop [interval]', cn: '在会话中设置定时重复任务', en: 'Schedule recurring tasks' },
+  { cmd: '/batch', cn: '为大型并行更改自动创建工作树', en: 'Auto-create worktrees for parallel changes' },
+  { cmd: '/model [model]', cn: '会话中切换模型', en: 'Switch models mid-session' },
+  { cmd: '/effort [level]', cn: '设置推理努力程度', en: 'Set reasoning effort level' },
+  { cmd: '/init', cn: '创建 CLAUDE.md 项目记忆文件', en: 'Create CLAUDE.md for project memory' },
+  { cmd: '/memory', cn: '编辑 CLAUDE.md 文件', en: 'Open CLAUDE.md for editing' },
+  { cmd: '/config', cn: '打开交互式设置配置', en: 'Open interactive settings' },
+  { cmd: '/permissions', cn: '查看/更新工具权限', en: 'View/update tool permissions' },
+  { cmd: '/agents', cn: '管理专用子智能体', en: 'Manage specialized subagents' },
+  { cmd: '/mcp', cn: '管理 MCP 服务器的交互界面', en: 'Interactive UI for MCP servers' },
+  { cmd: '/add-dir', cn: '添加额外工作目录（如 monorepo）', en: 'Add additional working directories' },
+  { cmd: '/usage', cn: '显示计划和速率限制状态', en: 'Show plan limits & rate limit status' },
+  { cmd: '/voice', cn: '启用语音模式（20种语言）', en: 'Enable push-to-talk voice mode' },
+  { cmd: '/release-notes', cn: '版本发布说明', en: 'Interactive picker for release notes' },
+];
+
+const shortcuts = [
+  { key: 'Ctrl+C', cn: '取消当前输入或生成', en: 'Cancel current input or generation' },
+  { key: 'Ctrl+D', cn: '退出会话', en: 'Exit session' },
+  { key: 'Ctrl+R', cn: '反向搜索命令历史', en: 'Reverse search command history' },
+  { key: 'Ctrl+B', cn: '将运行任务放到后台', en: 'Background a running task' },
+  { key: 'Ctrl+V', cn: '粘贴图片到对话中', en: 'Paste image into conversation' },
+  { key: 'Ctrl+O', cn: '查看 Claude 的思维过程', en: 'See Claude\'s thinking process' },
+  { key: 'Ctrl+G / Ctrl+X Ctrl+E', cn: '在外部编辑器中打开提示', en: 'Open prompt in external editor' },
+  { key: 'Esc Esc', cn: '回退对话或代码状态/总结', en: 'Rewind/summarize conversation or code' },
+  { key: 'Shift+Tab', cn: '循环切换权限模式', en: 'Cycle permission modes' },
+  { key: 'Alt+P', cn: '切换模型', en: 'Switch model' },
+  { key: 'Alt+T', cn: '切换思考模式', en: 'Toggle thinking mode' },
+  { key: 'Alt+O', cn: '切换快速模式', en: 'Toggle Fast Mode' },
+  { key: '\\ + Enter', cn: '快速换行', en: 'Quick newline' },
+  { key: 'Shift+Enter', cn: '换行（备选）', en: 'Newline (alternative)' },
+  { key: 'Ctrl+J', cn: '换行（备选）', en: 'Newline (alternative)' },
+  { key: '!command', cn: '直接执行 bash 命令，绕过 AI', en: 'Execute bash directly, bypass AI' },
+  { key: '@path', cn: '引用文件/目录（自动补全）', en: 'Reference files/dirs with autocomplete' },
+  { key: '#note', cn: '快速添加到 CLAUDE.md 记忆', en: 'Quick add to CLAUDE.md memory' },
+];
+
+const envVars = [
+  { var: 'ANTHROPIC_API_KEY', cn: 'API Key 认证（替代 OAuth）', en: 'API key for auth (alternative to OAuth)' },
+  { var: 'CLAUDE_CODE_EFFORT_LEVEL', cn: '默认推理努力程度', en: 'Default effort level (low/medium/high/max)' },
+  { var: 'MAX_THINKING_TOKENS', cn: '限制思考 token 数（设为 0 禁用）', en: 'Cap thinking tokens (0 = disable)' },
+  { var: 'MAX_MCP_OUTPUT_TOKENS', cn: 'MCP 服务器输出上限', en: 'Cap output from MCP servers' },
+  { var: 'CLAUDE_CODE_NO_FLICKER', cn: '启用 alt-screen 消除终端闪烁', en: 'Enable alt-screen to eliminate flicker' },
+  { var: 'CLAUDE_CODE_SUBPROCESS_ENV_SCRUB', cn: '从子进程中清除凭据信息', en: 'Strip credentials from sub-processes' },
+];
+
+const settings = [
+  { item: '.claude/settings.json', cn: '项目级设置（共享，git 跟踪）', en: 'Project settings (shared, git-tracked)' },
+  { item: '.claude/settings.local.json', cn: '本地项目设置（个人，被 gitignore）', en: 'Local project settings (personal, gitignored)' },
+  { item: '~/.claude/settings.json', cn: '用户全局设置', en: 'User global settings' },
+  { item: './CLAUDE.md', cn: '项目记忆文件（git 跟踪）', en: 'Project memory file (git-tracked)' },
+  { item: '.claude/CLAUDE.local.md', cn: '本地记忆文件（被 gitignore）', en: 'Local memory file (gitignored)' },
+  { item: '~/.claude/CLAUDE.md', cn: '全局记忆文件（所有项目适用）', en: 'Global memory file (applies to all projects)' },
+  { item: '.claude/rules/*.md', cn: '项目规则目录（模块化 CLAUDE.md）', en: 'Project rules directory (modular)' },
+  { item: '~/.claude/rules/*.md', cn: '用户规则目录', en: 'User rules directory' },
+  { item: '.claude/agents/', cn: '项目级子智能体定义', en: 'Project-level subagent definitions' },
+  { item: '~/.claude/agents/', cn: '用户级子智能体定义', en: 'User-level subagent definitions' },
+  { item: '.claude/commands/<name>.md', cn: '项目级自定义斜杠命令', en: 'Project-level custom slash commands' },
+  { item: '~/.claude/commands/<name>.md', cn: '用户级自定义斜杠命令', en: 'User-level custom slash commands' },
+  { item: '.claude/skills/', cn: '技能文件（Claude 自动调用）', en: 'Skills directory (auto-invoked by Claude)' },
+  { item: 'permissions.allow', cn: '工具权限白名单', en: 'Tool permission whitelist' },
+  { item: 'permissions.ask', cn: '工具权限需询问', en: 'Tool permission "ask" list' },
+  { item: 'permissions.deny', cn: '工具权限黑名单', en: 'Tool permission deny list' },
+  { item: 'hooks.PostToolUse', cn: '工具使用后自动运行命令', en: 'Run commands after tool use' },
+  { item: 'hooks.PreToolUse', cn: '工具使用前安全把关', en: 'Security gate before tool use' },
+  { item: 'hooks.Stop', cn: 'Claude 完成回复时触发', en: 'Fire when Claude finishes a response' },
+  { item: 'hooks.UserPromptSubmit', cn: '用户提交提示时触发', en: 'Fire when user submits a prompt' },
+  { item: 'hooks.SessionStart', cn: '会话开始时触发', en: 'Fire when session starts' },
+];
+
+// ======================== RENDER ========================
+
+function renderTable(data, tbodyId, countId, cols) {
+  const tbody = document.getElementById(tbodyId);
+  const countEl = document.getElementById(countId);
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  data.forEach(item => {
+    const tr = document.createElement('tr');
+    if (cols === 4) {
+      // subcommands: cmd, cn, en, ex
+      tr.innerHTML = `
+        <td class="cell-command">${item.cmd}</td>
+        <td class="cell-cn">${item.cn}</td>
+        <td class="cell-en">${item.en}</td>
+        <td class="cell-example">${item.ex || ''}</td>`;
+    } else if (cols === 'flag') {
+      let tagClass = 'tag-both', tagText = 'both';
+      if (item.mode === 'print') { tagClass = 'tag-print'; tagText = 'print'; }
+      else if (item.mode === 'int') { tagClass = 'tag-int'; tagText = 'interactive'; }
+      tr.innerHTML = `
+        <td class="cell-command"><span class="flag-prefix">-- </span>${item.flag}</td>
+        <td class="cell-cn">${item.cn}</td>
+        <td class="cell-en">${item.en}</td>
+        <td style="text-align:right"><span class="tag ${tagClass}">${tagText}</span></td>`;
+    } else {
+      tr.innerHTML = `
+        <td class="cell-command">${item.cmd || item.key || item.var || item.item}</td>
+        <td class="cell-cn">${item.cn}</td>
+        <td class="cell-en">${item.en}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+  if (countEl) countEl.textContent = data.length;
+}
+
+// Render all tables
+renderTable(subcommands, 'tbody-subcommands', 'count-subcommands', 4);
+renderTable(flags, 'tbody-flags', 'count-flags', 'flag');
+renderTable(slashCommands, 'tbody-slash', 'count-slash', 3);
+renderTable(shortcuts, 'tbody-shortcuts', 'count-shortcuts', 3);
+renderTable(envVars, 'tbody-env', 'count-env', 3);
+renderTable(settings, 'tbody-settings', 'count-settings', 3);
+
+// Total count
+document.getElementById('totalCmds').textContent = subcommands.length + flags.length;
+
+// ======================== SEARCH ========================
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const allRows = document.querySelectorAll('tbody tr');
+  let found = 0;
+  allRows.forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    if (!q || text.includes(q)) {
+      tr.classList.remove('hidden');
+      found++;
+    } else {
+      tr.classList.add('hidden');
+    }
+  });
+  document.getElementById('noResults').classList.toggle('visible', found === 0);
+  // Update per-section counts
+  document.querySelectorAll('table').forEach(table => {
+    const visible = table.querySelectorAll('tbody tr:not(.hidden)').length;
+    const header = table.closest('.section')?.querySelector('.count');
+    if (header) header.textContent = visible;
+  });
+}
+
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+});
+
+// ======================== LANG TOGGLE ========================
+
+let langMode = 'both'; // 'both' | 'en'
+
+function toggleLang() {
+  const btn = document.getElementById('langToggle');
+  if (langMode === 'both') {
+    langMode = 'en';
+    btn.innerHTML = '<span>🇬🇧</span> English Only';
+    // Hide CN columns, show EN
+    document.querySelectorAll('.cell-cn').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.cell-en').forEach(el => el.style.display = '');
+    document.querySelectorAll('.section-header .en-hint, .badge-en').forEach(el => el.style.display = 'none');
+  } else {
+    langMode = 'both';
+    btn.innerHTML = '<span>🇨🇳</span> 中 / EN';
+    document.querySelectorAll('.cell-cn').forEach(el => el.style.display = '');
+    document.querySelectorAll('.cell-en').forEach(el => el.style.display = '');
+    document.querySelectorAll('.section-header .en-hint, .badge-en').forEach(el => el.style.display = '');
+  }
+}
+
+// Init: show both
+document.querySelectorAll('.cell-en').forEach(el => el.style.display = '');
+
+</script>
+</body>
+</html>
